@@ -22,12 +22,6 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	// // Вывод всех ключей и значений из конфигурационного файла
-	// settings := viper.AllSettings()
-	// for key, value := range settings {
-	// 	log.Printf("%s: %v\n", key, value)
-	// }
-
 	var config Config
 	err := viper.Unmarshal(&config)
 	if err != nil {

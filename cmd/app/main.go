@@ -39,6 +39,9 @@ func main() {
 			logger.Error("Failed to close camera connection", zap.Error(err))
 		}
 	}()
+	for {
+
+	}
 
 	logger.Debug("Camera connected", zap.String("address", cfg.Camera))
 

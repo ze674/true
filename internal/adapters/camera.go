@@ -12,6 +12,8 @@ import (
 var rwTimeout = 1 * time.Second   // Таймаут для чтения/записи
 var dialTimeout = 5 * time.Second // Таймаут для подключения
 
+var retryDelay = 2 * time.Second // Задержка между повторными попытками
+
 type Camera struct {
 	Address string
 	Conn    net.Conn
@@ -31,7 +33,6 @@ func (c *Camera) Connect() error {
 	op := fmt.Sprintf("Camera.Connect: %s", c.Address)
 
 	c.Logger.Info("Attempting to connect to camera", zap.String("operation", op))
-
 	conn, err := net.DialTimeout("tcp", c.Address, dialTimeout)
 	if err != nil {
 		c.Logger.Error("Failed to connect to camera", zap.String("operation", op), zap.Error(err))
@@ -41,6 +42,18 @@ func (c *Camera) Connect() error {
 	c.Conn = conn
 	c.Logger.Info("Successfully connected to camera", zap.String("operation", op))
 	return nil
+}
+
+func (c *Camera) Reconnect() error {
+	c.Close()
+	for {
+		err := c.Connect()
+		if err == nil {
+			return nil
+		}
+		c.Logger.Error("Reconnect failed, retrying...", zap.Error(err))
+		time.Sleep(retryDelay)
+	}
 }
 
 // Close closes the connection to the camera
